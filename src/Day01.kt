@@ -18,10 +18,11 @@ fun main() {
     }
 
     totals.add(sum)
+    totals.sortDescending()
 
     // Part 1
-    println(totals.maxOf { it })
+    println(totals.first())
 
     // Part 2
-    println(totals.sortedDescending().take(3).sum())
+    println(totals.take(3).sum())
 }
