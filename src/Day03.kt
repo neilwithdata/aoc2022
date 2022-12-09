@@ -17,21 +17,21 @@ fun main() {
         val firstHalf = line.substring(0, line.length / 2)
         val secondHalf = line.substring(line.length / 2)
 
-        findCommonChars(firstHalf, secondHalf).first().priority()
+        findCommonChar(firstHalf, secondHalf).priority()
     })
 
     // Part 2
     println(input.chunked(3) { group ->
-        findCommonChars(*group.toTypedArray()).first().priority()
+        findCommonChar(*group.toTypedArray()).priority()
     }.sum())
 }
 
-fun findCommonChars(vararg strings: String): Set<Char> {
+fun findCommonChar(vararg strings: String): Char {
     var common = strings.first().toSet()
 
     for (string in strings.drop(1)) {
         common = common intersect string.toSet()
     }
 
-    return common
+    return common.first()
 }
