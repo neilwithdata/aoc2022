@@ -5,11 +5,17 @@ fun main() {
         .readLines()
         .first()
 
-    for (i in 4 until input.lastIndex) {
-        val buffer = input.substring(i - 4, i)
+    println(findMarker(input, 4)) // Part 1
+    println(findMarker(input, 14)) // Part 2
+}
+
+fun findMarker(input: String, length: Int): Int {
+    for (i in length until input.lastIndex) {
+        val buffer = input.substring(i - length, i)
         if (buffer.groupingBy { it }.eachCount().all { it.value == 1 }) {
-            println(i)
-            break
+            return i
         }
     }
+
+    throw IllegalStateException("Marker not found")
 }
