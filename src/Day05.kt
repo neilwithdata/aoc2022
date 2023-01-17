@@ -1,18 +1,35 @@
 import java.io.File
 
-data class Instruction(val source: Int, val destination: Int, val n: Int)
+data class Instruction(
+    val source: Int,
+    val destination: Int,
+    val n: Int,
+    val inOrder: Boolean = false
+)
 
 fun main() {
     val input = File("data/day05_input.txt")
         .readLines()
 
-    val instructions = readInstructions(input)
+    val instructions = readInstructions(input, inOrder = true)
     val stacks = readInitialState(input)
 
     for (instruction in instructions) {
-        repeat(instruction.n) {
-            val crate = stacks[instruction.source].removeLast()
-            stacks[instruction.destination].add(crate)
+        if (instruction.inOrder) { // Part 2
+            val buffer = mutableListOf<Char>()
+            repeat(instruction.n) {
+                val crate = stacks[instruction.source].removeLast()
+                buffer.add(crate)
+            }
+
+            while (buffer.isNotEmpty()) {
+                stacks[instruction.destination].add(buffer.removeLast())
+            }
+        } else {
+            repeat(instruction.n) { // Part 1
+                val crate = stacks[instruction.source].removeLast()
+                stacks[instruction.destination].add(crate)
+            }
         }
     }
 
@@ -23,13 +40,13 @@ fun main() {
     println(result)
 }
 
-fun readInstructions(input: List<String>): List<Instruction> {
+fun readInstructions(input: List<String>, inOrder: Boolean): List<Instruction> {
     val instructionRegex = Regex("""move (\d+) from (\d) to (\d)""")
 
     return instructionRegex.findAll(input.joinToString())
         .map {
             val (n, source, dest) = it.destructured
-            Instruction(source.toInt() - 1, dest.toInt() - 1, n.toInt())
+            Instruction(source.toInt() - 1, dest.toInt() - 1, n.toInt(), inOrder)
         }.toList()
 }
 
