@@ -21,7 +21,7 @@ open class Directory(
     private val _children = mutableListOf<FileSystemEntry>()
     val children: List<FileSystemEntry> = _children
 
-    fun hasChild(name: String): Boolean {
+    private fun hasChild(name: String): Boolean {
         return children.firstOrNull { it.name == name } != null
     }
 
@@ -47,25 +47,37 @@ fun main() {
         .readLines()
 
     val root = buildDirectoryTree(input)
+    val dirs = getAllSubdirectories(root)
 
-    // Sum up the sizes of directories with size <= 100000
-    val queue = ArrayDeque<FileSystemEntry>()
-    queue.add(root)
+    // Part 1
+    println(dirs
+        .filter { it.size <= 100000 }
+        .sumOf { it.size })
 
-    var totalSize: Long = 0
+    // Part 2
+    // find the smallest directory >= `required`
+    val required = 30_000_000 - (70_000_000 - root.size)
+    println(dirs
+        .sortedBy { it.size }
+        .first { it.size >= required }
+        .size)
 
-    while (queue.isNotEmpty()) {
-        val curr = queue.removeFirst()
+}
+
+fun getAllSubdirectories(directory: Directory): List<Directory> {
+    val dirs = mutableListOf<Directory>()
+    val stack = ArrayDeque<FileSystemEntry>()
+    stack.add(directory)
+
+    while (stack.isNotEmpty()) {
+        val curr = stack.removeFirst()
         if (curr is Directory) {
-            queue.addAll(curr.children)
-
-            if (curr.size <= 100000) {
-                totalSize += curr.size
-            }
+            stack.addAll(curr.children)
+            dirs.add(curr)
         }
     }
 
-    println(totalSize)
+    return dirs
 }
 
 fun buildDirectoryTree(input: List<String>): Directory {
