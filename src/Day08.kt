@@ -1,5 +1,20 @@
 import java.io.File
 
+enum class VISIBILITY {
+    BLOCKED,
+    TO_EDGE
+}
+
+data class Direction(val dx: Int = 0, val dy: Int = 0)
+
+private val allDirections = listOf(
+    Direction(dx = -1),
+    Direction(dx = +1),
+    Direction(dy = -1),
+    Direction(dy = +1)
+)
+
+
 class Grid(input: List<String>) {
     val cols = input[0].length
     val rows = input.size
@@ -14,45 +29,39 @@ class Grid(input: List<String>) {
         }
     }
 
-    fun isVisible(rowIndex: Int, colIndex: Int): Boolean {
-        val height = grid[rowIndex][colIndex]
+    // returns the viewing distance from the position in the grid in the given direction
+    private fun findViewingDistance(row: Int, col: Int, direction: Direction): Pair<VISIBILITY, Int> {
+        val height = grid[row][col]
 
-        // returns true if all trees in the given direction are lower than height
-        fun checkDirection(dx: Int = 0, dy: Int = 0): Boolean {
-            var currRow = rowIndex + dy
-            var currCol = colIndex + dx
+        var currRow = row + direction.dy
+        var currCol = col + direction.dx
+        var dist = 0
 
-            while (currRow in 0 until rows && currCol in 0 until cols) {
-                if (grid[currRow][currCol] >= height) {
-                    return false
-                }
+        while (currRow in 0 until rows && currCol in 0 until cols) {
+            dist++
 
-                currRow += dy
-                currCol += dx
+            if (grid[currRow][currCol] >= height) {
+                return Pair(VISIBILITY.BLOCKED, dist)
             }
 
-            return true
+            currRow += direction.dy
+            currCol += direction.dx
         }
 
-        // edges are always visible
-        if (rowIndex == 0 ||
-            colIndex == 0 ||
-            rowIndex == rows - 1 ||
-            colIndex == cols - 1
-        ) {
-            return true
-        }
+        return Pair(VISIBILITY.TO_EDGE, dist)
+    }
 
-        // if visible from any direction
-        if (checkDirection(dx = -1) ||
-            checkDirection(dx = +1) ||
-            checkDirection(dy = -1) ||
-            checkDirection(dy = +1)
-        ) {
-            return true
+    fun isVisible(row: Int, col: Int): Boolean {
+        return allDirections.any { direction ->
+            val dist = findViewingDistance(row, col, direction)
+            dist.first == VISIBILITY.TO_EDGE
         }
+    }
 
-        return false
+    fun scenicScore(row: Int, col: Int): Int {
+        return allDirections.map { direction ->
+            findViewingDistance(row, col, direction).second
+        }.reduce { acc, d -> acc * d }
     }
 }
 
@@ -63,13 +72,23 @@ fun main() {
     val grid = Grid(input)
 
     var visibleCount = 0
+    var highestScenicScore = 0
+
     for (row in 0 until grid.rows) {
         for (col in 0 until grid.cols) {
+            // Part 1
             if (grid.isVisible(row, col)) {
                 visibleCount++
+            }
+
+            // Part 2
+            val scenicScore = grid.scenicScore(row, col)
+            if (scenicScore > highestScenicScore) {
+                highestScenicScore = scenicScore
             }
         }
     }
 
     println(visibleCount)
+    println(highestScenicScore)
 }
