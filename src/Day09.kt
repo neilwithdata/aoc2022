@@ -52,30 +52,54 @@ data class Command(val direction: Direction, val count: Int) {
 }
 
 fun main() {
-    val head = Position(0, 0)
-    val tail = Position(0, 0)
+    val commands = File("data/day09_input.txt")
+        .readLines()
+        .map { Command.fromString(it) }
 
-    val tailVisited = mutableSetOf(tail.copy())
-
-    fun step(direction: Direction) {
-        // Move the head one step in direction
-        head.move(direction)
-
-        if (!head.isTouching(tail)) {
-            // Move the tail to keep up with the head
-            tail.snapTo(head)
-            tailVisited.add(tail.copy())
+    // Part 1
+    val shortRope = buildList {
+        repeat(2) {
+            add(Position(0, 0))
         }
     }
 
-    File("data/day09_input.txt")
-        .readLines()
-        .map { Command.fromString(it) }
-        .forEach { command ->
-            repeat(command.count) {
-                step(command.direction)
+    println("Part 1: ${runCommands(commands, shortRope)}")
+
+    // Part 2
+    val longRope = buildList {
+        repeat(10) {
+            add(Position(0, 0))
+        }
+    }
+
+    println("Part 2: ${runCommands(commands, longRope)}")
+}
+
+fun runCommands(commands: List<Command>, rope: List<Position>): Int {
+    val tailVisited = mutableSetOf(rope.last().copy())
+
+    fun step(direction: Direction) {
+        // Move the head one step in direction
+        rope.first().move(direction)
+
+        // Update each link in the rope to follow the parent
+        for (i in 1 until rope.size) {
+            val link = rope[i]
+            val parent = rope[i - 1]
+
+            if (!link.isTouching(parent)) {
+                link.snapTo(parent)
             }
         }
 
-    println(tailVisited.size)
+        tailVisited.add(rope.last().copy())
+    }
+
+    commands.forEach { command ->
+        repeat(command.count) {
+            step(command.direction)
+        }
+    }
+
+    return tailVisited.size
 }
