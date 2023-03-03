@@ -1,5 +1,6 @@
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.sign
 
 enum class Direction {
     UP,
@@ -23,19 +24,11 @@ data class Position(var x: Int, var y: Int) {
     }
 
     fun snapTo(position: Position) {
-        if (this.y == position.y) { // Same row
-            this.x += if (position.x > this.x) 1 else -1
-        } else if (this.x == position.x) { // Same column
-            this.y += if (position.y > this.y) 1 else -1
-        } else { // Diagonal
-            if (abs(this.y - position.y) >= 2) {
-                this.x = position.x
-                this.y += if (position.y > this.y) 1 else -1
-            } else {
-                this.y = position.y
-                this.x += if (position.x > this.x) 1 else -1
-            }
-        }
+        val xDiff = this.x - position.x
+        val yDiff = this.y - position.y
+
+        this.x = position.x + if (abs(xDiff) >= 2) xDiff.sign else 0
+        this.y = position.y + if (abs(yDiff) >= 2) yDiff.sign else 0
     }
 }
 
