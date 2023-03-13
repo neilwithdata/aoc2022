@@ -23,12 +23,19 @@ fun main() {
         if ((cycle - 20) % 40 == 0) {
             sum += cycle * xRegister
         }
+
+        val currentPixel = (cycle - 1) % 40
+        if (currentPixel == 0) println()
+        print(if (xRegister in (currentPixel - 1)..(currentPixel + 1)) '#' else '.')
     }
 
     println(sum)
 }
 
-fun runInstructions(instructions: List<Instruction>, callback: (cycle: Int, xRegister: Int) -> Unit) {
+fun runInstructions(
+    instructions: List<Instruction>,
+    callback: (cycle: Int, xRegister: Int) -> Unit
+) {
     var cycle = 1
     var xRegister = 1
 
